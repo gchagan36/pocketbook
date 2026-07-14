@@ -170,3 +170,36 @@ These rules are what make the provider swap free: adding or removing Plaid touch
 4. API routes and a minimal dashboard
 5. SimpleFIN provider (small) or Plaid provider (Link flow, token vault, webhooks)
 6. Polish: reports, backfill script, export
+
+---
+
+## Part 3: Technology Stack
+
+**Decision: Python backend, React frontend.**
+
+### Backend (Python 3.12+)
+
+| Concern | Choice | Notes |
+|---|---|---|
+| API framework | FastAPI + Uvicorn | Async, minimal boilerplate; auto-generated OpenAPI docs act as a free API explorer during development |
+| Canonical models | Pydantic | `core/models` — Transaction, Account, Budget, Category as validated types shared across layers |
+| Database access | `sqlite3` (stdlib), hand-written SQL | For a single-user app an ORM adds more ceremony than value; all SQL is already confined to `db/repositories` |
+| HTTP client | httpx | SimpleFIN polling in `providers/simplefin` |
+| Plaid SDK | plaid-python | Only needed if/when the Plaid provider is added |
+| Scheduler | APScheduler | In-process cron for `sync/scheduler`; no external services |
+| Fuzzy matching | rapidfuzz | Merchant-string similarity for `sync/dedup` and `core/categorization` |
+| File parsing | ofxparse (+ stdlib `csv`) | `providers/csv_import` |
+| Testing | pytest | Fixtures hold sanitized provider payloads |
+| Tooling | uv (dependencies), ruff (lint/format) | |
+
+### Frontend
+
+| Concern | Choice | Notes |
+|---|---|---|
+| Framework | React + Vite + TypeScript | Instant dev reload; production build is static files |
+| Data fetching | TanStack Query | Caching and refetch-after-sync against the API client |
+| Charts | Recharts | Spending trends, category breakdowns, budget bars |
+
+### Deployment model
+
+Single process: FastAPI serves both the API and the built React bundle as static files; APScheduler runs inside the same process; SQLite is a single file on disk. Deployment means running one Python process on a home server, Raspberry Pi, or small VPS. Backup means copying one database file (plus the encrypted token vault key kept in the environment).
