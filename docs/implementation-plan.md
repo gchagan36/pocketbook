@@ -31,6 +31,10 @@ Goal: a runnable, linted, tested skeleton with dependency management in place be
 
 Goal: the canonical shapes everything speaks, plus the only layer allowed to touch SQL. Per the doc's build order, this comes first.
 
+> **Status (2026-07-16):** In progress. Task 1 (canonical models) ✅ done — `core/models`
+> imports clean, `ruff` clean, fingerprint deterministic. Tasks 2–5 (schema, migrations,
+> repositories, `init-db`) and Task 6 (tests) not started. Next: schema DDL.
+
 **Tasks**
 1. **Canonical models (`core/models`)** — define Pydantic types: `Account`, `Transaction`, `Category`, `CategoryRule`, `Budget`, and a `SyncState` shape. Decide field-level details that dedup and budgets will depend on: money representation (store integer minor units / cents — do **not** use floats), a stable transaction fingerprint concept, pending vs posted status, provider-source tag, and category-confidence/needs-review flag. These types are shared across every layer; get them right before building on them.
 2. **Schema DDL (`db/schema`)** — write SQLite DDL for accounts, transactions, categories, category_rules, budgets, and sync_state. Add the indexes dedup will need (account + amount + date range lookups) and a uniqueness strategy for transaction identity. Enable `PRAGMA foreign_keys` and choose date/text storage conventions.
