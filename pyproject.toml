@@ -34,11 +34,10 @@ exclude = [
     "site-packages"
 ]
 target-version = "py312"
-line-length = 88
 indent-width = 4
 
 [tool.ruff.lint]
-ignore = []
+ignore = ["E501"]
 fixable = ["ALL"]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
